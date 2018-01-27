@@ -14,6 +14,12 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
+
 /**
  * A stub of a subsystem for learning purposes.
  */
@@ -23,6 +29,15 @@ public class Testbed extends Subsystem
     // the keyword, 'static', should only be used if you know what you're doing and, even then, sparingly.
     private static Testbed sInstance = null;
 
+    // Sent from the PI
+    public boolean fromPI = false;
+    
+    public boolean fromRIO = false;
+    
+    NetworkTableInstance foo;
+    NetworkTable pi;
+    NetworkTable values;
+                    
     public static Testbed getInstance()
     {
         // Testbed is a singleton, meaning that only one object of the class
@@ -101,6 +116,8 @@ public class Testbed extends Subsystem
             synchronized (Testbed.this)
             {
                 mSystemState = SystemState.IDLING;
+                logNotice("Testbed loop has started!");
+
             }
         }
 
@@ -182,8 +199,31 @@ public class Testbed extends Subsystem
 
     private void runOpenLoop(double percentOutput)
     {
+        // This is where code is run, this is where the networktables would go
+        //goalposition.getSubTable("Pi");
+        //Basic idea is to snag a table from the PI, and then get a value.
+        //Get the table named "pi"
+        //pi = foo.getTable("pi");
+                
+        //Get the sub-tables named "Values"
+        //values = pi.getSubTable("Values");
+        
+        //NetworkTableEntry foo = values.getEntry("key");
+        //FromPI = the value of the entry named key
+        //fromPI = foo.getBoolean(false);
+        
+        String message = String.valueOf("True");
+                
+        logNotice("fromPI is set to ");
+        logNotice(message);
+        
+     
+        
+        
         mMotor1.set(percentOutput);
-        mMotor2.set(percentOutput);;
+        mMotor2.set(percentOutput);
+        
+        
     }
 
     /** describes the steps needed to progress from the current
