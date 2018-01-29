@@ -17,6 +17,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.*;
 
 
 /**
@@ -29,13 +30,16 @@ public class Testbed extends Subsystem
     private static Testbed sInstance = null;
 
     // Sent from the PI
-    public boolean fromPI = false;
+    public double fromPI = 0;
     
     public boolean fromRIO = false;
     
-    NetworkTableInstance foo;
-    NetworkTable pi;
+    //NetworkTable foo;
+    NetworkTableInstance pi;
     NetworkTable values;
+    NetworkTable sd;
+    
+    NetworkTableEntry found;
                     
     public static Testbed getInstance()
     {
@@ -115,6 +119,13 @@ public class Testbed extends Subsystem
             {
                 mSystemState = SystemState.IDLING;
                 logNotice("Testbed loop has started!");
+                //Networktable testing
+                pi = NetworkTableInstance.getDefault();
+                //I do NOT know what .getDefault() does, and it may be something intresting
+                
+                sd = pi.getTable("SmartDashboard");        
+                //Get the sub-tables named "Values"
+                values = sd.getSubTable("Values");
 
             }
         }
@@ -201,17 +212,12 @@ public class Testbed extends Subsystem
         //goalposition.getSubTable("Pi");
         //Basic idea is to snag a table from the PI, and then get a value.
         //Get the table named "pi"
-        //pi = foo.getTable("pi");
-                
-        //Get the sub-tables named "Values"
-        //values = pi.getSubTable("Values");
-        
-        //NetworkTableEntry foo = values.getEntry("key");
+
+        found = values.getEntry("foundIt");
         //FromPI = the value of the entry named key
-        //fromPI = foo.getBoolean(false);
+        fromPI = found.getDouble(0.0);
         
-        String message = String.valueOf("True");
-                
+        String message = Double.toString(fromPI);                
         logNotice("fromPI is set to ");
         logNotice(message);
         
