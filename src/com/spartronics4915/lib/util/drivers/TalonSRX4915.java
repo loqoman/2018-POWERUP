@@ -2,6 +2,7 @@ package com.spartronics4915.lib.util.drivers;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.spartronics4915.lib.util.CANProbe;
+import com.spartronics4915.lib.util.Logger;
 import com.ctre.phoenix.ParamEnum;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.Faults;
@@ -512,73 +513,72 @@ public class TalonSRX4915 implements Sendable, MotorSafety
         return sb.toString();
     }
 
-    public String dumpPIDState()
+    public String dumpPIDState(int slotIdx)
     {
         StringBuilder sb = new StringBuilder()
                 .append(" Motion Magic Cruise Velocity:")
-                .append(mTalon.configGetParameter(ParamEnum.eMotMag_VelCruise, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eMotMag_VelCruise, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("  Motion Magic Max Accel:")
-                .append(mTalon.configGetParameter(ParamEnum.eMotMag_Accel, 0, sInitTimeoutMS))
+                .append(mTalon.configGetParameter(ParamEnum.eMotMag_Accel, slotIdx, sInitTimeoutMS))
                 .append("\n")
                 .append("  slot0 P:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_P, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_P, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       I:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_I, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_I, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       D:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_D, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_D, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       F:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_F, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_F, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       allowable error:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_AllowableErr, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_AllowableErr, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       izone:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_IZone, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_IZone, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       maxiaccum:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_MaxIAccum, 0,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_MaxIAccum, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("  slot1 P:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_P, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_P, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       I:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_I, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_I, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       D:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_D, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_D, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       F:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_F, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_F, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       allowable error:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_AllowableErr, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_AllowableErr, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       izone:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_IZone, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_IZone, slotIdx,
                         sInitTimeoutMS))
                 .append("\n")
                 .append("       maxiaccum:")
-                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_MaxIAccum, 1,
+                .append(mTalon.configGetParameter(ParamEnum.eProfileParamSlot_MaxIAccum, slotIdx,
                         sInitTimeoutMS));
         return sb.toString();
-
     }
 
     public String dumpFaults()
