@@ -16,70 +16,142 @@ public class ControlBoard implements ControlBoardInterface
 
     private static ControlBoardInterface mInstance = null;
 
-    private static final boolean kUseGamepad = true;
-
     public static ControlBoardInterface getInstance()
     {
         if (mInstance == null)
         {
-            if (kUseGamepad)
-            {
-                mInstance = new GamepadControlBoard();
-            }
-            else
-            {
-                mInstance = new ControlBoard();
-            }
+            mInstance = new ControlBoard();
         }
         return mInstance;
     }
 
-    private final Joystick mThrottleStick;
-    private final Joystick mTurnStick;
-    private final Joystick mButtonBoard;
+    private final Joystick mDrivestick;
+    private final Joystick mButtonBoard; // Currently unused
 
     protected ControlBoard()
     {
-        mThrottleStick = new Joystick(0);
-        mTurnStick = new Joystick(1);
-        mButtonBoard = new Joystick(2);
+        mDrivestick = new Joystick(0);
+        mButtonBoard = null; // FIXME
     }
 
-    // DRIVER CONTROLS
     @Override
     public double getThrottle()
     {
-        return -mThrottleStick.getRawAxis(0);
+        return mDrivestick.getY();
     }
 
     @Override
     public double getTurn()
     {
-        return -mTurnStick.getY();
+        return mDrivestick.getX();
     }
 
     @Override
     public boolean getQuickTurn()
     {
-        return mTurnStick.getRawButton(1);
+        return mDrivestick.getRawButtonPressed(2);
     }
 
     @Override
     public boolean getLowGear()
     {
-        return mThrottleStick.getRawButton(2);
+        return mDrivestick.getTriggerPressed();
     }
 
     @Override
-    public boolean getBlinkLEDButton()
+
+    public boolean getClimberClimb()
     {
-        return mButtonBoard.getRawButton(9);
+        return mDrivestick.getRawButtonReleased(17);
     }
 
     @Override
-    public boolean getIntakeButton()
+
+    public boolean getClimberIdle()
     {
-        // See XboxControlBoard
-        return false;
+        return mDrivestick.getRawButtonReleased(18);
+    }
+
+    @Override
+    public boolean getClimberHold()
+    {
+        return mDrivestick.getRawButtonReleased(19);
+    }
+
+    @Override
+    public boolean getClimberPrepare()
+    {
+        return mDrivestick.getRawButtonReleased(20);
+
+    }
+
+    public boolean getScissorLiftOff()
+    {
+        return mDrivestick.getRawButtonReleased(7);
+    }
+
+    public boolean getScissorLiftRetracted()
+    {
+        return mDrivestick.getRawButtonReleased(8);
+    }
+
+    @Override
+    public boolean getScissorLiftSwitch()
+    {
+        return mDrivestick.getRawButtonReleased(9);
+    }
+
+    @Override
+    public boolean getScissorLiftScale()
+
+    {
+        return mDrivestick.getRawButtonReleased(10);
+    }
+
+    @Override
+    public boolean getScissorLiftManualUp()
+    {
+        return mDrivestick.getRawButtonReleased(11);
+    }
+
+    @Override
+    public boolean getScissorLiftManualDown()
+    {
+        return mDrivestick.getRawButtonReleased(12);
+    }
+
+    @Override
+    public boolean getHarvesterIntake()
+    {
+        return mDrivestick.getRawButtonReleased(7); 
+    }
+    
+    @Override
+    public boolean getHarvesterEject()
+    {
+        return mDrivestick.getRawButtonReleased(9); 
+    }
+    
+    @Override
+    public boolean getHarvesterOpen()
+    {
+        return mDrivestick.getRawButtonReleased(11);
+    }
+    
+    public boolean getDebugPrimary()
+    {
+        return mDrivestick.getRawButton(3);
+    }
+
+    @Override
+    public boolean getDebugSecondary()
+    {
+        return mDrivestick.getRawButton(4);
+    }
+
+    @Override
+    public boolean getDebugTertiary()
+    {
+        return mDrivestick.getRawButton(5);
     }
 }

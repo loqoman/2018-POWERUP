@@ -28,7 +28,6 @@ import com.spartronics4915.lib.util.DelayedBoolean;
 import com.spartronics4915.lib.util.DriveSignal;
 import com.spartronics4915.lib.util.math.RigidTransform2d;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -79,20 +78,17 @@ public class Robot extends IterativeRobot
     private ControlBoardInterface mControlBoard = null;
 
     private Looper mEnabledLooper = null;
-    //    private VisionServer mVisionServer = null;
-    private AnalogInput mCheckLightButton = null;
-    private DelayedBoolean mDelayedAimButton;
+
+    // smartdashboard keys
+    private static final String kRobotVerbosity = "Robot/Verbosity";
+    private static final String kRobotTestModeOptions = "TestModeOptions";
+    private static final String kRobotTestMode = "TestMode";
+    private static final String kRobotTestVariant = "TestVariant";
 
     public Robot()
     {
         Logger.logRobotConstruction();
         // please defer initialization of objects until robotInit
-    }
-
-    public void zeroAllSensors()
-    {
-        mSubsystemManager.zeroSensors();
-        mRobotState.reset(Timer.getFPGATimestamp(), new RigidTransform2d());
     }
 
     /**
@@ -114,6 +110,7 @@ public class Robot extends IterativeRobot
                     "  on: " + attributes.getValue("Built-At") +
                     "  (" + attributes.getValue("Code-Version") + ")";
             SmartDashboard.putString("Build", buildStr);
+            SmartDashboard.putString(kRobotVerbosity, "NOTICE"); // competition verbosity
 
             Logger.notice("=================================================");
             Logger.notice(Instant.now().toString());
@@ -144,13 +141,13 @@ public class Robot extends IterativeRobot
 
             // Subsystem instances
             mDrive = Drive.getInstance();
-            mSuperstructure = Superstructure.getInstance();
             mLED = LED.getInstance();
             mGrabber = ArticulatedGrabber.getInstance();
             mClimber = Climber.getInstance();
             mHarvester = Harvester.getInstance();
             mLifter = ScissorLift.getInstance();
-            
+            mSuperstructure = Superstructure.getInstance();
+
             mRobotState = RobotState.getInstance();
             mAutoModeExecuter = null;
             mConnectionMonitor = ConnectionMonitor.getInstance();
@@ -160,22 +157,19 @@ public class Robot extends IterativeRobot
 
             // Initialize other helper objects
             mCheesyDriveHelper = new CheesyDriveHelper();
-            mControlBoard = new XboxControlBoard();
+            mControlBoard = new ControlBoard();
 
             mEnabledLooper = new Looper();
-            mCheckLightButton = new AnalogInput(Constants.kLEDOnId);
 
             mSubsystemManager.registerEnabledLoops(mEnabledLooper);
             mEnabledLooper.register(VisionProcessor.getInstance());
             mEnabledLooper.register(RobotStateEstimator.getInstance());
 
-            // mVisionServer.addVisionUpdateReceiver(VisionProcessor.getInstance());
-
             AutoModeSelector.initAutoModeSelector();
-
-            mDelayedAimButton = new DelayedBoolean(Timer.getFPGATimestamp(), 0.1);
-            // Force an true update now to prevent robot from running at start.
-            mDelayedAimButton.update(Timer.getFPGATimestamp(), true);
+            SmartDashboard.putString(kRobotTestModeOptions,
+                    "None,ArticulatedGrabber,Climber,Drive,Harvester,LED,ScissorLift,All");
+            SmartDashboard.putString(kRobotTestMode, "None");
+            SmartDashboard.putString(kRobotTestVariant, "");
 
             // Pre calculate the paths we use for auto.
             PathAdapter.calculatePaths();
@@ -190,6 +184,12 @@ public class Robot extends IterativeRobot
         Logger.notice("robotInit complete, success:" + success);
     }
 
+    public void zeroAllSensors()
+    {
+        mSubsystemManager.zeroSensors();
+        mRobotState.reset(Timer.getFPGATimestamp(), new RigidTransform2d());
+    }
+
     /**
      * Initializes the robot for the beginning of autonomous mode (set
      * drivebase, intake and superstructure to correct
@@ -202,6 +202,7 @@ public class Robot extends IterativeRobot
     {
         try
         {
+            Logger.setVerbosity(SmartDashboard.getString(kRobotVerbosity, "NOTICE"));
             Logger.logAutoInit();
             Logger.notice("Auto start timestamp: " + Timer.getFPGATimestamp());
 
@@ -247,6 +248,7 @@ public class Robot extends IterativeRobot
     {
         try
         {
+            Logger.setVerbosity(SmartDashboard.getString(kRobotVerbosity, "NOTICE"));
             Logger.logTeleopInit();
 
             // Start loopers
@@ -273,6 +275,7 @@ public class Robot extends IterativeRobot
      * Each subsystem will constantly compare
      * its desired and actual states and act to bring the two closer.
      */
+
     @Override
     public void teleopPeriodic()
     {
@@ -283,10 +286,86 @@ public class Robot extends IterativeRobot
             mDrive.setOpenLoop(
                     mCheesyDriveHelper.cheesyDrive(throttle, turn, mControlBoard.getQuickTurn(),
                             !mControlBoard.getLowGear()));
-            
-            if (mControlBoard.getBlinkLEDButton())
+
+            if (mControlBoard.getHarvesterIntake())
             {
-                mLED.setWantedState(LED.WantedState.BLINK);
+                mHarvester.setWantedState(Harvester.WantedState.HARVEST);
+            }
+
+            if (mControlBoard.getHarvesterEject())
+            {
+                mHarvester.setWantedState(Harvester.WantedState.EJECT);
+            }
+
+            if (mControlBoard.getHarvesterOpen())
+            {
+                mHarvester.setWantedState(Harvester.WantedState.OPEN);
+            }
+
+            if (mControlBoard.getClimberClimb())
+            {
+                mClimber.setWantedState(Climber.WantedState.CLIMB);
+            }
+
+            if (mControlBoard.getClimberIdle())
+            {
+                mClimber.setWantedState(Climber.WantedState.IDLE);
+            }
+
+            if (mControlBoard.getClimberHold())
+            {
+                mClimber.setWantedState(Climber.WantedState.HOLD);
+            }
+
+            if (mControlBoard.getClimberPrepare())
+            {
+                mClimber.setWantedState(Climber.WantedState.PREPARE);
+            }
+
+            if (mControlBoard.getScissorLiftRetracted())
+            {
+                mLifter.setWantedState(ScissorLift.WantedState.RETRACTED);
+            }
+
+            if (mControlBoard.getScissorLiftSwitch())
+            {
+                mLifter.setWantedState(ScissorLift.WantedState.SWITCH);
+            }
+
+            if (mControlBoard.getScissorLiftScale())
+            {
+                mLifter.setWantedState(ScissorLift.WantedState.SCALE);
+            }
+
+            if (mControlBoard.getScissorLiftManualUp())
+            {
+                mLifter.setWantedState(ScissorLift.WantedState.MANUALUP);
+            }
+
+            if (mControlBoard.getScissorLiftManualDown())
+            {
+                mLifter.setWantedState(ScissorLift.WantedState.MANUALDOWN);
+            }
+
+            if (mControlBoard.getScissorLiftOff())
+            {
+                mLifter.setWantedState(ScissorLift.WantedState.OFF);
+            }
+
+            if (mControlBoard.getDebugPrimary())
+            {
+                Logger.debug("Setting Lifter to RETRACTED");
+                mLifter.setWantedState(ScissorLift.WantedState.RETRACTED);
+            }
+            else if (mControlBoard.getDebugSecondary())
+            {
+                Logger.debug("Setting Lifter to SCALE");
+                mLifter.setWantedState(ScissorLift.WantedState.SCALE);
+            }
+            else if (mControlBoard.getDebugTertiary())
+            {
+                Logger.debug("Setting Lifter to SWITCH");
+                mLifter.setWantedState(ScissorLift.WantedState.SWITCH);
             }
 
             allButTestPeriodic();
@@ -303,6 +382,7 @@ public class Robot extends IterativeRobot
     {
         try
         {
+            Logger.setVerbosity(SmartDashboard.getString(kRobotVerbosity, "NOTICE"));
             Logger.logDisabledInit();
 
             if (mAutoModeExecuter != null)
@@ -330,16 +410,6 @@ public class Robot extends IterativeRobot
     @Override
     public void disabledPeriodic()
     {
-        final double kVoltageThreshold = 0.15;
-        if (mCheckLightButton.getAverageVoltage() < kVoltageThreshold)
-        {
-            mLED.setLEDOn();
-        }
-        else
-        {
-            mLED.setLEDOff();
-        }
-
         // don't zero sensors during disabledPeriodic... zeroAllSensors();
         allButTestPeriodic();
     }
@@ -347,24 +417,68 @@ public class Robot extends IterativeRobot
     @Override
     public void testInit()
     {
-        Timer.delay(0.5);
+        Logger.setVerbosity(SmartDashboard.getString(kRobotVerbosity, "NOTICE"));
+        String testMode = SmartDashboard.getString(kRobotTestMode, "None");
+        String testVariant = SmartDashboard.getString(kRobotTestVariant, "");
 
-        boolean results = mDrive.checkSystem();
-        // e.g. results &= Intake.getInstance().checkSystem();
-
-        if (!results)
+        if (testMode.equals("None"))
         {
-            Logger.error("CHECK ABOVE OUTPUT SOME SYSTEMS FAILED!!!");
+            Logger.notice("Robot: no tests to run");
+            return;
         }
         else
         {
-            Logger.notice("ALL SYSTEMS PASSED");
+            Logger.notice("Robot: running test mode " + testMode +
+                    " variant:" + testVariant + " -------------------------");
+            mEnabledLooper.stop();
+        }
+        Timer.delay(0.5);
+
+        boolean success = true;
+        if (testMode.equals("ArticulatedGrabber") || testMode.equals("All"))
+        {
+            success &= mGrabber.checkSystem(testVariant);
+        }
+
+        if (testMode.equals("Drive") || testMode.equals("All"))
+        {
+            success &= mDrive.checkSystem(testVariant);
+        }
+
+        if (testMode.equals("Climber") || testMode.equals("All"))
+        {
+            success &= mClimber.checkSystem(testVariant);
+        }
+
+        if (testMode.equals("Harvester") || testMode.equals("All"))
+        {
+            success &= mHarvester.checkSystem(testVariant);
+        }
+
+        if (testMode.equals("LED") || testMode.equals("All"))
+        {
+            success &= mLED.checkSystem(testVariant);
+        }
+
+        if (testMode.equals("ScissorLifter") || testMode.equals("All"))
+        {
+            success &= mLifter.checkSystem(testVariant);
+        }
+
+        if (!success)
+        {
+            Logger.error("Robot: CHECK ABOVE OUTPUT SOME SYSTEMS FAILED!!!");
+        }
+        else
+        {
+            Logger.notice("Robot: ALL SYSTEMS PASSED");
         }
     }
 
     @Override
     public void testPeriodic()
     {
+        // nothing to do here.
     }
 
     /**

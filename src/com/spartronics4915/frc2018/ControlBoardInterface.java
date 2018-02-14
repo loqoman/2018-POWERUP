@@ -14,9 +14,38 @@ public interface ControlBoardInterface
     boolean getQuickTurn();
 
     boolean getLowGear();
-    
-    boolean getIntakeButton();
 
-    // OPERATOR CONTROLS
-    boolean getBlinkLEDButton();
+    boolean getClimberClimb();
+
+    boolean getClimberIdle();
+
+    boolean getClimberHold();
+
+    boolean getClimberPrepare();
+
+    boolean getScissorLiftOff();
+    
+    boolean getScissorLiftRetracted();
+    
+    boolean getScissorLiftSwitch();
+    
+    boolean getScissorLiftScale();
+    
+    boolean getScissorLiftManualUp();
+    
+    boolean getScissorLiftManualDown();
+    
+    boolean getHarvesterIntake();
+    
+    boolean getHarvesterEject();
+    
+    boolean getHarvesterOpen();
+    
+    // Debug buttons, remove me
+    boolean getDebugPrimary();
+
+    boolean getDebugSecondary();
+
+    boolean getDebugTertiary();
+
 }
