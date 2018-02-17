@@ -465,11 +465,10 @@ public class Drive extends Subsystem
         if (!this.isInitialized())
             return;
         double dx = mVisionTargetAngleEntry.getNumber(0).doubleValue();
-        if (dx != 0.0) {
-            setWantAimToVisionTarget();
-        }
-        if (dx == 0.0) {
+        if (dx > 30) {
             dx = -5;
+        } else {
+            setWantAimToVisionTarget();
         }
         final Rotation2d robotToTarget = Rotation2d.fromDegrees(dx); 
         // angle reversed to correct for raspi coordsys
