@@ -8,6 +8,7 @@ import com.spartronics4915.frc2018.RobotState;
 import com.spartronics4915.frc2018.ShooterAimingParameters;
 import com.spartronics4915.frc2018.loops.Loop;
 import com.spartronics4915.frc2018.loops.Looper;
+import com.spartronics4915.frc2018.subsystems.Climber.WantedState;
 import com.spartronics4915.lib.util.DriveSignal;
 import com.spartronics4915.lib.util.ReflectingCSVWriter;
 import com.spartronics4915.lib.util.Util;
@@ -98,7 +99,6 @@ public class Drive extends Subsystem
                 //  into velocity mode here? (without consulting mDriveControlState)
                 logNotice("onStart " + mDriveControlState);
                 setOpenLoop(DriveSignal.NEUTRAL);
-                mMotorGroup.enableBraking(false);
                 setVelocitySetpoint(0, 0);
                 if (!mMotorGroup.hasIMU())
                 {
@@ -218,11 +218,6 @@ public class Drive extends Subsystem
         mMotorGroup.driveOpenLoop(signal.getLeft(), signal.getRight());
     }
 
-    public void enableBraking(boolean s)
-    {
-        mMotorGroup.enableBraking(s);
-    }
-
     @Override
     public synchronized void stop()
     {
@@ -324,7 +319,7 @@ public class Drive extends Subsystem
             return;
         logNotice("beginOpenLoop");
         mMotorGroup.beginOpenLoop(kOpenLoopRampRate, kOpenLoopNominalOutput, kOpenLoopPeakOutput);
-        mMotorGroup.enableBraking(false); // rationale: drivers would like to coast as then enter neutral-deadband
+        mMotorGroup.enableBraking(true); // drivers like to stop on a dime
         mDriveControlState = DriveControlState.OPEN_LOOP;
     }
 
@@ -339,6 +334,7 @@ public class Drive extends Subsystem
         {
             // We entered a velocity control state.
             logNotice("beginSpeedControl");
+            mMotorGroup.resetIntegralAccumulator();
             mMotorGroup.beginClosedLoopVelocity(kVelocityControlSlot,
                     Constants.kDriveHighGearNominalOutput);
             mMotorGroup.enableBraking(true);
@@ -356,6 +352,7 @@ public class Drive extends Subsystem
         {
             // We entered a position control state.
             logNotice("beginPositionControl");
+            mMotorGroup.resetIntegralAccumulator();
             mMotorGroup.beginClosedLoopPosition(kPositionControlSlot,
                     Constants.kDriveLowGearNominalOutput,
                     Constants.kDriveLowGearMaxVelocity,

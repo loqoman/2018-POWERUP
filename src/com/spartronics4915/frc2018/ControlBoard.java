@@ -54,10 +54,10 @@ public class ControlBoard implements ControlBoardInterface
         double result = 0.;
         switch (a)
         {
-            case kThrottle:
-                result = -mDrivestick.getZ(); // Is this reversed on the new joystick???
+            case THROTTLE:
+                result = -mDrivestick.getY();
                 break;
-            case kTurn:
+            case TURN:
                 result = mDrivestick.getX();
                 break;
             default:
@@ -74,60 +74,60 @@ public class ControlBoard implements ControlBoardInterface
         double current;
         switch (b)
         {
-            case kQuickTurn:
-                result = mDrivestick.getRawButtonPressed(2);
+            case DRIVE_QUICK_TURN:
+                result = mDrivestick.getRawButtonPressed(1);
                 break;
-            case kLowGear:
+            case DRIVE_SLOW:
                 result = mDrivestick.getTriggerPressed(); // available!
                 break;
-            case kReadyToHarvest:
+            case SCISSOR_OFF:
                 current = mButtonBoard.getRawAxis(2);
                 result = (mPreviousGetReadyToHarvest != current) && (current == 1.0);
                 mPreviousGetReadyToHarvest = current;
                 break;
-            case kReadyToDropSwitch:
+            case SCISSOR_SWITCH:
                 result = mButtonBoard.getRawButtonPressed(1);
                 break;
-            case kReadyToDropScale:
+            case SCISSOR_SCALE:
                 result = mButtonBoard.getRawButtonPressed(2);
                 break;
-            case kDropCube:
+            case GRABBER_DROP_CUBE:
                 current = mButtonBoard.getRawAxis(3);
-                result = (mPreviousGetDropCube != current) && (current == 1.0);
+                result = (mPreviousGetDropCube != current) && (current == 1.0 || mDrivestick.getRawButtonPressed(6));
                 mPreviousGetDropCube = current;
                 break;
-            case kOpenHarvester:
-                result = mButtonBoard.getRawButtonPressed(5);
+            case HARVESTER_OPEN:
+                result = mButtonBoard.getRawButtonPressed(5) || mDrivestick.getRawButtonPressed(2);
                 break;
-            case kCloseHarvester:
-                result = mButtonBoard.getRawButtonPressed(3);
+            case HARVESTER_CLOSE:
+                result = mButtonBoard.getRawButtonPressed(3) || mDrivestick.getRawButtonPressed(3);
                 break;
-            case kEjectCube:
+            case HARVESTER_EJECT:
                 result = mButtonBoard.getRawButtonPressed(4);
                 break;
-            case kCarryCube:
-                result = mButtonBoard.getRawButtonPressed(6);
+            case SUPERSTRUCTURE_CARRY_CUBE:
+                result = mButtonBoard.getRawButtonPressed(6) || mDrivestick.getRawButtonPressed(5);
                 break;
-            case kClimb:
+            case HARVESTER_CLIMB:
                 result = mButtonBoard.getRawButtonPressed(7);
                 break;
-            case kStopClimb:
+            case CLIMBER_STOP:
                 result = mButtonBoard.getRawButtonPressed(8);
                 break;
-            case kTestClimbIdle:
-                result = mTestsAllowed ? mDrivestick.getRawButtonPressed(5) : false;
-                break;
-            case kTestGrabberTransport:
-                result = mTestsAllowed ? mDrivestick.getRawButtonPressed(6) : false;
-                break;
-            case kTestGrabberGrabCube:
+            case CLIMB_IDLE_TEST:
                 result = mTestsAllowed ? mDrivestick.getRawButtonPressed(7) : false;
                 break;
-            case kTestGrabberPrepareDrop:
+            case GRABBER_TRANSPORT_TEST:
                 result = mTestsAllowed ? mDrivestick.getRawButtonPressed(8) : false;
                 break;
-            case kTestGrabberPrepareIntake:
+            case GRABBER_GRAB_CUBE_TEST:
                 result = mTestsAllowed ? mDrivestick.getRawButtonPressed(9) : false;
+                break;
+            case GRABBER_PREPARE_DROP_TEST:
+                result = mTestsAllowed ? mDrivestick.getRawButtonPressed(10) : false;
+                break;
+            case GRABBER_PREPARE_INTAKE_TEST:
+                result = mTestsAllowed ? mDrivestick.getRawButtonPressed(11) : false;
                 break;
             default:
                 Logger.error("ControlBoard: unimplemented boolean: " + b.toString());

@@ -180,7 +180,7 @@ public class TalonSRX4915 implements Sendable, MotorSafety
         mTalon.configNominalOutputReverse(0.0, timeOutMS); // [-1, 0]
         mTalon.configPeakOutputForward(1.0, timeOutMS);
         mTalon.configPeakOutputReverse(-1.0, timeOutMS);
-        
+
         // current limits are TalonSRX-specific
         // Configure the continuous allowable current-draw (when current limit is enabled).
         // Current limit is activated when current exceeds the peak limit for longer than the
@@ -298,6 +298,29 @@ public class TalonSRX4915 implements Sendable, MotorSafety
         mTalon.setSensorPhase(sensorPhase);
         mTalon.setInverted(invertMotorOutput);
     }
+    
+    // soft limits depend upon a sensor and are measured in raw sensor units.
+    public void configMotorSoftLimits(boolean enableFwd, boolean enableRev,
+                                    int sensorUnits)
+    {
+        mTalon.configForwardSoftLimitEnable(enableFwd, sInitTimeoutMS);
+        mTalon.configForwardSoftLimitThreshold(sensorUnits, sInitTimeoutMS);
+        mTalon.configReverseSoftLimitEnable(enableRev, sInitTimeoutMS);
+        mTalon.configReverseSoftLimitThreshold(sensorUnits, sInitTimeoutMS);  
+    }
+    
+    public void configLimitSwitches(LimitSwitchSource fwdsrc,
+                                    LimitSwitchSource revsrc,
+            LimitSwitchNormal normallyOpenOrClosed)
+    {
+        if (mTalon != null)
+        {
+            mTalon.configForwardLimitSwitchSource(fwdsrc,
+                    normallyOpenOrClosed, sInitTimeoutMS);
+            mTalon.configReverseLimitSwitchSource(revsrc,
+                    normallyOpenOrClosed, sInitTimeoutMS);
+        }
+    }
 
     public void configFollower(int masterId, boolean invert)
     {
@@ -333,7 +356,19 @@ public class TalonSRX4915 implements Sendable, MotorSafety
         mTalon.configPeakOutputForward(peakFwdOutput, sInitTimeoutMS);
         mTalon.configPeakOutputReverse(peakRevOutput, sInitTimeoutMS);
     }
-
+    
+    public void configCurrentLimit(boolean enabled, int continuousLimit,
+            int peakLimit, int peakDuration )
+    {
+        if(mTalon != null)
+        {
+            mTalon.enableCurrentLimit(false);
+            mTalon.configContinuousCurrentLimit(continuousLimit, sInitTimeoutMS); // 10 amps
+            mTalon.configPeakCurrentLimit(peakLimit, sInitTimeoutMS);
+            mTalon.configPeakCurrentDuration(peakDuration, sInitTimeoutMS); // millisecond
+        }
+    }
+    
     public void configMotionMagicRPM(double maxVelocityRPM, double maxAccelRPMPerSec)
     {
         if (mTalon == null)
@@ -620,6 +655,13 @@ public class TalonSRX4915 implements Sendable, MotorSafety
         this.mControlMode = m; // in SRX mode, set() requires controlmode
     }
 
+    public void setIntegralAccumulator(double iAccum)
+    {
+        if (mTalon == null)
+            return;
+        mTalon.setIntegralAccumulator(iAccum, sPidIdx, sUpdateTimeoutMS);
+    }
+    
     public void setVelocityRPM(double rpm)
     {
         if (mTalon == null)
